@@ -1,0 +1,156 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f4f6f8;
+  color: #1a202c;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 40px;
+  background-color: #007367; /* Primary GITAM Deep Teal */
+  border-bottom: 1px solid #005a50;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+nav h1 {
+  margin: 0;
+}
+
+nav button {
+  padding: 10px 16px;
+  background-color: #3c61a0; /* Accent GITAM Blue */
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+nav button:hover {
+  background-color: #2e4d82;
+}
+
+form {
+  width: 500px;
+  margin: 30px auto;
+  padding: 25px;
+  background-color: #007367; /* Primary GITAM Deep Teal */
+  color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+form h2 {
+  margin-top: 0;
+  color: #ffffff;
+}
+
+form input,
+form select {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0 15px;
+  border: 1px solid #2e7972;
+  border-radius: 6px;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  color: #1a202c;
+}
+
+form button {
+  padding: 10px 18px;
+  background-color: #3c61a0; /* Accent GITAM Blue */
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+form button:hover {
+  background-color: #2e4d82;
+}
+
+div > select {
+  padding: 10px;
+  margin: 10px 20px;
+  border-radius: 6px;
+  border: 1px solid #cccccc;
+  background-color: #ffffff;
+  color: #1a202c;
+}
+
+div > label {
+  margin-left: 20px;
+  font-weight: bold;
+  color: #007367;
+}
+
+div > div {
+  margin: 15px 20px;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+div > div h2 {
+  margin-top: 0;
+  color: #007367;
+}
+
+.note-card {
+  margin: 15px 20px;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.note-card h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #007367;
+}
+
+.note-card p {
+  margin: 8px 0;
+  color: #333333;
+}
+
+.note-card a {
+  color: #3c61a0;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.note-card a:hover {
+  text-decoration: underline;
+}
+
+.note-card button {
+  margin-top: 10px;
+  margin-right: 8px;
+  padding: 9px 16px;
+  background-color: #007367; /* Primary GITAM Deep Teal */
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.note-card button:hover {
+  background-color: #005a50;
+}
