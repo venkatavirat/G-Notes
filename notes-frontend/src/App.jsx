@@ -1,71 +1,47 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import Auth from "./components/Auth";
+import UploadForm from "./components/UploadForm";
+import NoteList from "./components/NoteList";
 import "./App.css";
 
-import Navbar from "./components/Navbar";
-import NoteList from "./components/NoteList";
-import SubjectFilter from "./components/SubjectFilter";
-import UploadForm from "./components/UploadForm";
-
-import axios from "axios";
-
 function App() {
-    const [notes, setNotes] = useState([]);
-    const [selectedSubject, setSelectedSubject] = useState("All");
+  const [user, setUser] = useState(null);
 
-    function fetchNotes() {
-        axios
-            .get("http://localhost:5000/api/notes")
-            .then((response) => {
-                setNotes(response.data);
-            })
-            .catch((error) => {
-                console.error("Error fetching notes:", error);
-            });
+  useEffect(() => {
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
     }
+  }, []);
 
-    useEffect(() => {
-        fetchNotes();
-    }, []); 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+  };
 
-    const filteredNotes =
-        selectedSubject === "All"
-            ? notes
-            : notes.filter((note) => note.subjectCode === selectedSubject);
+  return (
+    <div>
+      <nav>
+        <h1>G-NOTES</h1>
+        {user ? (
+          <div>
+            <span style={{ marginRight: "15px", fontWeight: "bold" }}>Welcome, {user.name}</span>
+            <button onClick={handleLogout}>Logout</button>
+          </div>
+        ) : null}
+      </nav>
 
-    return (
-        <>
-            <Navbar />
-
-            <main>
-                <UploadForm onUpload={fetchNotes} />
-
-                <SubjectFilter
-                    selectedSubject={selectedSubject}
-                    setSelectedSubject={setSelectedSubject}
-                />
-
-                <NoteList
-                    notes={filteredNotes}
-                    onDelete={(id) => {
-                        setNotes((currentNotes) =>
-                            currentNotes.filter(
-                                (note) => note._id !== id
-                            )
-                        );
-                    }}
-                    onUpdate={(updatedNote) => {
-                        setNotes((currentNotes) =>
-                            currentNotes.map((note) =>
-                                note._id === updatedNote._id
-                                    ? updatedNote
-                                    : note
-                            )
-                        );
-                    }}
-                />
-            </main>
-        </>
-    );
+      {!user ? (
+        <Auth onLoginSuccess={(loggedInUser) => setUser(loggedInUser)} />
+      ) : (
+        <main>
+          <UploadForm />
+          <NoteList />
+        </main>
+      )}
+    </div>
+  );
 }
 
 export default App;

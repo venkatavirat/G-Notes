@@ -1,21 +1,29 @@
-function SubjectFilter({ selectedSubject, setSelectedSubject }) {
-  return (
-    <div>
-      <label>Filter by subject: </label>
+const SubjectFilter = ({ selectedSubject, onSelectSubject }) => {
+  const subjects = [
+    "All",
+    "Computer Science (CSE)",
+    "Information Technology (IT)",
+    "Electronics (ECE)",
+    "Mechanical (ME)",
+    "Mathematics",
+    "Physics"
+  ];
 
+  return (
+    <div style={{ margin: "20px 0" }}>
+      <label style={{ fontWeight: "bold", marginLeft: "20px" }}>Filter by Subject: </label>
       <select
         value={selectedSubject}
-        onChange={(e) => setSelectedSubject(e.target.value)}
+        onChange={(e) => onSelectSubject(e.target.value)}
       >
-        <option value="All">All Subjects</option>
-        <option value="24CSEN2041">24CSEN2041</option>
-        <option value="24CSEN2131">24CSEN2131</option>
-        <option value="24CSEN2051">24CSEN2051</option>
-        <option value="24CSEN2011">24CSEN2011</option>
-        <option value="24CSEN2061">24CSEN2061</option>
+        {subjects.map((subj) => (
+          <option key={subj} value={subj}>
+            {subj}
+          </option>
+        ))}
       </select>
     </div>
   );
-}
+};
 
 export default SubjectFilter;
