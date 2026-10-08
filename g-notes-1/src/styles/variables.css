@@ -1,0 +1,22 @@
+:root {
+    --color-navy: #002147;
+    --color-blue: #0056b3; /* Primary blue */
+    --color-light-gray: #f0f0f0; /* Light gray accents */
+    --color-white: #ffffff;
+    --color-shadow: rgba(0, 0, 0, 0.1); /* Soft drop shadow */
+}
+
+body {
+    background-color: var(--color-light-gray);
+    color: var(--color-navy);
+    font-family: 'Arial', sans-serif;
+}
+
+a {
+    color: var(--color-blue);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}

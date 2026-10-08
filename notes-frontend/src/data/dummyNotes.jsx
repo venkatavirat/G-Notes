@@ -2,7 +2,7 @@ const dummyNotes = [
   {
     id: 1,
     title: "DBMS Unit 1 Notes",
-    subjectCode: "24CSEN2041",
+    subjectName: "Database Management Systems",
     semester: 3,
     uploaderName: "Virat",
     fileUrl: "#"
@@ -10,7 +10,7 @@ const dummyNotes = [
   {
     id: 2,
     title: "Operating Systems Important Questions",
-    subjectCode: "24CSEN2131",
+    subjectName: "Operating Systems",
     semester: 3,
     uploaderName: "Rahul",
     fileUrl: "#"
@@ -18,7 +18,7 @@ const dummyNotes = [
   {
     id: 3,
     title: "Computer Networks Unit 2",
-    subjectCode: "24CSEN2051",
+    subjectName: "Computer Networks",
     semester: 3,
     uploaderName: "Ananya",
     fileUrl: "#"
@@ -26,7 +26,7 @@ const dummyNotes = [
   {
     id: 4,
     title: "Data Structures Notes",
-    subjectCode: "24CSEN2011",
+    subjectName: "Data Structures",
     semester: 3,
     uploaderName: "Kiran",
     fileUrl: "#"
@@ -34,7 +34,7 @@ const dummyNotes = [
   {
     id: 5,
     title: "Software Engineering Notes",
-    subjectCode: "24CSEN2061",
+    subjectName: "Software Engineering",
     semester: 3,
     uploaderName: "Arjun",
     fileUrl: "#"

@@ -1,0 +1,104 @@
+html
+:root {
+    --navy: #002147;
+    --blue: #007bff; /* Primary blue color */
+    --light-gray: #f8f9fa; /* Light gray for accents */
+    --white: #ffffff;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: var(--light-gray);
+    color: var(--navy);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    outline: none;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 15px;
+    box-shadow: 0 4px 10px var(--shadow-color);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px var(--shadow-color);
+}
+
+.badge {
+    display: inline-block;
+    background-color: var(--blue);
+    color: var(--white);
+    border-radius: 12px;
+    padding: 5px 10px;
+    margin: 5px;
+    font-size: 0.9em;
+}
+
+.sticky-header {
+    position: sticky;
+    top: 0;
+    background-color: var(--navy);
+    color: var(--white);
+    padding: 10px 20px;
+    box-shadow: 0 2px 5px var(--shadow-color);
+    z-index: 1000;
+}
+
+.sticky-header .logo {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.sticky-header .user-avatar {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    margin-left: auto;
+}
+
+.action-button {
+    background-color: var(--blue);
+    color: var(--white);
+    border-radius: 5px;
+    padding: 10px 15px;
+    margin-left: 10px;
+    transition: background-color 0.3s;
+}
+
+.action-button:hover {
+    background-color: darken(var(--blue), 10%);
+}

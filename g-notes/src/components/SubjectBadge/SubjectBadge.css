@@ -1,0 +1,30 @@
+.subject-badge {
+    display: inline-block;
+    padding: 8px 12px;
+    margin: 4px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-weight: 500;
+    font-size: 14px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.subject-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.subject-badge.cse {
+    background-color: rgba(0, 33, 71, 0.8);
+}
+
+.subject-badge.ece {
+    background-color: rgba(0, 71, 147, 0.8);
+}
+
+.subject-badge.other {
+    background-color: rgba(100, 100, 100, 0.8);
+}

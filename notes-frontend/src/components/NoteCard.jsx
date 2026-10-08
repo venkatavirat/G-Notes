@@ -1,11 +1,35 @@
-import axios from "axios";
 import { useState } from "react";
+import api from "../api";
+import { ACCEPTED_NOTE_FILE_TYPES, isSupportedNoteFile, MAX_NOTE_FILE_SIZE } from "../fileTypes";
 
-function NoteCard({ note, onDelete, onUpdate }) {
+function NoteCard({ note, canManage, currentUser, onDelete, onUpdate }) {
     const [isEditing, setIsEditing] = useState(false);
     const [title, setTitle] = useState(note.title);
-    const [subjectCode, setSubjectCode] = useState(note.subjectCode);
+    const [subjectName, setSubjectName] = useState(note.subjectName || note.subjectCode || "");
     const [semester, setSemester] = useState(note.semester);
+    const [file, setFile] = useState(null);
+    const [fileError, setFileError] = useState("");
+
+    const fileType = note.fileType?.toUpperCase() || note.fileName?.split(".").pop()?.toUpperCase() || "FILE";
+    const noteUploaderId = note.uploadedBy?._id || note.uploadedBy;
+    const currentUserId = currentUser?._id || currentUser?.id;
+    const canManageNote = canManage && (
+        currentUser?.role === "admin"
+        || (Boolean(currentUserId) && String(noteUploaderId) === String(currentUserId))
+    );
+    const downloadUrl = `${api.defaults.baseURL}/notes/${note._id}/download`;
+    const fileBadgeClass = fileType === "PDF"
+        ? "file-badge file-badge-pdf"
+        : ["PPT", "PPTX"].includes(fileType)
+            ? "file-badge file-badge-presentation"
+            : "file-badge";
+    const createdDate = note.createdAt
+        ? new Date(note.createdAt).toLocaleDateString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "numeric"
+        })
+        : "";
 
     async function handleDelete() {
         const confirmDelete = window.confirm(
@@ -15,69 +39,125 @@ function NoteCard({ note, onDelete, onUpdate }) {
         if (!confirmDelete) return;
 
         try {
-            await axios.delete(
-                `http://localhost:5000/api/notes/${note._id}`
-            );
-            onDelete(note._id);
+            const response = await api.delete(`/notes/${note._id}`);
+            onDelete(response.data.id || note._id);
         } catch (error) {
             console.error("Error deleting note:", error);
-            alert("Failed to delete note.");
+            if ([401, 403].includes(error.response?.status)) return;
+            alert(error.response?.data?.message || "Failed to delete note.");
         }
     }
 
-    async function handleSave() {
+    async function handleSave(event) {
+        event.preventDefault();
+        if (file && !isSupportedNoteFile(file)) {
+            setFileError("Only PDF (.pdf) and PowerPoint (.ppt, .pptx) files are permitted.");
+            return;
+        }
+        if (file && file.size > MAX_NOTE_FILE_SIZE) {
+            setFileError("Files must be 15 MB or smaller.");
+            return;
+        }
         try {
-            const response = await axios.put(
-                `http://localhost:5000/api/notes/${note._id}`,
-                { title, subjectCode, semester }
-            );
+            const formData = new FormData();
+            formData.append("title", title.trim());
+            formData.append("subjectName", subjectName.trim());
+            formData.append("semester", semester);
+            if (file) formData.append("file", file);
+
+            const response = await api.put(`/notes/${note._id}`, formData);
 
             onUpdate(response.data);
+            setFile(null);
             setIsEditing(false);
         } catch (error) {
             console.error("Error updating note:", error);
-            alert("Failed to update note.");
+            if ([401, 403].includes(error.response?.status)) return;
+            alert(error.response?.data?.message || "Failed to update note.");
         }
     }
 
-    return (
-        <div style={{ border: "1px solid #ccc", padding: "10px", margin: "10px 0" }}>
-            {isEditing ? (
-                <div>
-                    <input
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                    />
-                    <input
-                        value={subjectCode}
-                        onChange={(e) => setSubjectCode(e.target.value)}
-                    />
-                    <input
-                        value={semester}
-                        onChange={(e) => setSemester(e.target.value)}
-                    />
-                    <button onClick={handleSave}>Save</button>
-                    <button onClick={() => setIsEditing(false)}>Cancel</button>
-                </div>
-            ) : (
-                <div>
-                    <h3>{note.title}</h3>
-                    <p>Subject: {note.subjectCode}</p>
-                    <p>Semester: {note.semester}</p>
-                    {note.fileUrl && (
-                        <p>
-                            📄 Attachment:{" "}
-                            <a href={note.fileUrl} target="_blank" rel="noopener noreferrer">
-                                {note.fileName || "View / Download File"}
-                            </a>
-                        </p>
-                    )}
+    function cancelEdit() {
+        setTitle(note.title);
+        setSubjectName(note.subjectName || note.subjectCode || "");
+        setSemester(note.semester);
+        setFile(null);
+        setFileError("");
+        setIsEditing(false);
+    }
 
-                    <button onClick={() => setIsEditing(true)}>Edit</button>
-                    <button onClick={handleDelete}>Delete</button>
-                </div>
+    return (
+        <article className="note-card">
+            {isEditing ? (
+                <form className="stacked-form edit-form" onSubmit={handleSave}>
+                    <label>Title<input type="text" required minLength={3} maxLength={100} value={title} onChange={(event) => setTitle(event.target.value)} /></label>
+                    <label>Subject name<input type="text" required value={subjectName} onChange={(event) => setSubjectName(event.target.value)} /></label>
+                    <label>
+                        Semester
+                        <select required value={semester} onChange={(event) => setSemester(event.target.value)}>
+                            {Array.from({ length: 8 }, (_, index) => index + 1).map((value) => (
+                                <option key={value} value={value}>Semester {value}</option>
+                            ))}
+                        </select>
+                    </label>
+                    <label>
+                        Replace file
+                        <input
+                            type="file"
+                            accept={ACCEPTED_NOTE_FILE_TYPES}
+                            onChange={(event) => {
+                                const selectedFile = event.target.files?.[0] || null;
+                                setFileError(selectedFile && !isSupportedNoteFile(selectedFile)
+                                    ? "Only PDF (.pdf) and PowerPoint (.ppt, .pptx) files are permitted."
+                                    : selectedFile && selectedFile.size > MAX_NOTE_FILE_SIZE
+                                        ? "Files must be 15 MB or smaller."
+                                        : "");
+                                setFile(selectedFile);
+                            }}
+                        />
+                    </label>
+                    {fileError && <p className="form-error" role="alert">{fileError}</p>}
+                    <div className="card-actions">
+                        <button className="button button-primary" type="submit">Save changes</button>
+                        <button className="button button-muted" type="button" onClick={cancelEdit}>Cancel</button>
+                    </div>
+                </form>
+            ) : (
+                <>
+                    <div className="note-card-top">
+                        <span className={fileBadgeClass}>{fileType}</span>
+                        {createdDate && <time className="note-date" dateTime={note.createdAt}>{createdDate}</time>}
+                    </div>
+                    <h3>{note.title}</h3>
+                    <p className="note-subject">{note.subjectName || note.subjectCode || "General notes"} <span>·</span> Semester {note.semester}</p>
+                    <p className="note-uploader">
+                        Uploaded by: {
+                            note.uploadedBy?.name
+                            || (String(noteUploaderId || "") === String(currentUserId || "") ? currentUser?.name : null)
+                            || "Unknown uploader"
+                        }
+                    </p>
+                    {note.fileUrl && (
+                        <a className="file-link" href={downloadUrl} target="_blank" rel="noopener noreferrer">
+                            <span aria-hidden="true">↗</span>
+                            View File
+                        </a>
+                    )}
+                    {note.fileUrl && (
+                        <a className="file-link" href={`${downloadUrl}?download=true`}>
+                            <span aria-hidden="true">↓</span>
+                            Download Note
+                        </a>
+                    )}
+                    {canManageNote && (
+                        <div className="card-actions">
+                            <button className="button button-muted" onClick={() => setIsEditing(true)}>Edit</button>
+                            <button className="button button-danger-quiet" onClick={handleDelete}>Delete Note</button>
+                        </div>
+                    )}
+                </>
             )}
-        </div>
+        </article>
     );
 }
 

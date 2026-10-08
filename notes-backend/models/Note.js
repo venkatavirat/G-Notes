@@ -4,17 +4,39 @@ const noteSchema = new mongoose.Schema(
     {
         title: {
             type: String,
-            required: true
+            required: true,
+            trim: true,
+            minlength: 3,
+            maxlength: 100
+        },
+
+        subjectName: {
+            type: String,
+            trim: true,
+            default: ""
         },
 
         subjectCode: {
             type: String,
-            required: true
+            trim: true,
+            default: ""
         },
 
         semester: {
             type: Number,
-            required: true
+            required: true,
+            min: 1,
+            max: 8,
+            validate: {
+                validator: Number.isInteger,
+                message: "Semester must be an integer from 1 to 8."
+            }
+        },
+
+        fileType: {
+            type: String,
+            required: true,
+            enum: ["pdf", "ppt", "pptx"]
         },
 
         fileUrl: {
@@ -27,6 +49,12 @@ const noteSchema = new mongoose.Schema(
             type: String,
             required: false,
             default: ""
+        },
+
+        uploadedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true
         }
     },
     {

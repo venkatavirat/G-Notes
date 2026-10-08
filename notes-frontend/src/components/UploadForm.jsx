@@ -1,88 +1,159 @@
-import { useState } from "react";
-import axios from "axios";
+import { useRef, useState } from "react";
+import api from "../api";
+import { ACCEPTED_NOTE_FILE_TYPES, isSupportedNoteFile, MAX_NOTE_FILE_SIZE } from "../fileTypes";
 
 function UploadForm({ onUpload }) {
   const [title, setTitle] = useState("");
-  const [subjectCode, setSubjectCode] = useState("");
+  const [subjectName, setSubjectName] = useState("");
   const [semester, setSemester] = useState("");
   const [file, setFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [fileError, setFileError] = useState("");
+  const [formError, setFormError] = useState("");
+  const fileInputRef = useRef(null);
+  const titleLength = title.trim().length;
+  const isTitleLengthValid = titleLength >= 3 && titleLength <= 100;
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  async function handleSubmit(event) {
+    event.preventDefault();
 
-    if (!title || !subjectCode || !semester) {
-      alert("Please fill in all text fields.");
+    setFormError("");
+    if (!title.trim() || !subjectName.trim() || !semester || !file) {
+      setFormError("Please complete all fields and select a file.");
+      return;
+    }
+
+    if (!isSupportedNoteFile(file)) {
+      setFormError("Only PDF (.pdf) and PowerPoint (.ppt, .pptx) files are permitted.");
+      return;
+    }
+    if (file.size > MAX_NOTE_FILE_SIZE) {
+      setFormError("Files must be 15 MB or smaller.");
+      return;
+    }
+    if (title.trim().length < 3 || title.trim().length > 100) {
+      setFormError("Note titles must be between 3 and 100 characters.");
       return;
     }
 
     const formData = new FormData();
-    formData.append("title", title);
-    formData.append("subjectCode", subjectCode);
+    formData.append("title", title.trim());
+    formData.append("subjectName", subjectName.trim());
     formData.append("semester", semester);
-    if (file) {
-      formData.append("file", file);
+    formData.append("file", file);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setFormError("Sign in before uploading a note.");
+      return;
     }
 
     try {
       setIsUploading(true);
-      await axios.post("http://localhost:5000/api/notes", formData, {
-        headers: { "Content-Type": "multipart/form-data" }
+
+      await api.post("/notes", formData, {
+        headers: { Authorization: `Bearer ${token}` }
       });
 
-      alert("Note uploaded successfully!");
+      setFormError("");
       setTitle("");
-      setSubjectCode("");
+      setSubjectName("");
       setSemester("");
       setFile(null);
-      onUpload();
+      setFileError("");
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      onUpload?.();
     } catch (error) {
       console.error("Error uploading note:", error);
-      alert("Failed to upload note.");
+      if ([401, 403].includes(error.response?.status)) return;
+      setFormError(error.response?.data?.error || error.response?.data?.message || "Failed to upload note.");
     } finally {
       setIsUploading(false);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Upload a Note</h2>
+    <section className="panel upload-panel">
+      <div className="panel-heading">
+        <span className="eyebrow">CONTRIBUTE</span>
+        <h2>Share a note</h2>
+        <p>Help someone else get one step closer.</p>
+      </div>
+      <form className="stacked-form" onSubmit={handleSubmit}>
 
-      <input
-        type="text"
-        placeholder="Note title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
+        <label>
+          Note title
+          <input
+            type="text"
+            placeholder="e.g. Introduction to algorithms"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            minLength={3}
+            maxLength={100}
+            required
+          />
+          <span className={`validation-badge ${isTitleLengthValid ? "validation-badge-valid" : "validation-badge-invalid"}`}>
+            {isTitleLengthValid
+              ? `${titleLength}/100 characters`
+              : titleLength < 3
+                ? `${titleLength}/3 minimum characters`
+                : `${titleLength}/100 maximum characters`}
+          </span>
+        </label>
 
-      <select
-        value={subjectCode}
-        onChange={(e) => setSubjectCode(e.target.value)}
-      >
-        <option value="">Select subject</option>
-        <option value="24CSEN2041">24CSEN2041</option>
-        <option value="24CSEN2131">24CSEN2131</option>
-        <option value="24CSEN2051">24CSEN2051</option>
-        <option value="24CSEN2011">24CSEN2011</option>
-        <option value="24CSEN2061">24CSEN2061</option>
-      </select>
+        <label>
+          Subject name
+          <input
+            type="text"
+            placeholder="e.g. Data Structures"
+            value={subjectName}
+            onChange={(event) => setSubjectName(event.target.value)}
+            required
+          />
+        </label>
 
-      <input
-        type="number"
-        placeholder="Semester"
-        value={semester}
-        onChange={(e) => setSemester(e.target.value)}
-      />
+        <label>
+          Semester
+          <select value={semester} onChange={(event) => setSemester(event.target.value)} required>
+            <option value="">Choose a semester</option>
+            {Array.from({ length: 8 }, (_, index) => index + 1).map((value) => (
+              <option key={value} value={value}>Semester {value}</option>
+            ))}
+          </select>
+        </label>
 
-      <input
-        type="file"
-        onChange={(e) => setFile(e.target.files[0])}
-      />
+        <label>
+          Choose a file
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={ACCEPTED_NOTE_FILE_TYPES}
+            onChange={(event) => {
+              const selectedFile = event.target.files?.[0] || null;
+              const message = selectedFile && !isSupportedNoteFile(selectedFile)
+                ? "Only PDF (.pdf) and PowerPoint (.ppt, .pptx) files are permitted."
+                : selectedFile && selectedFile.size > MAX_NOTE_FILE_SIZE
+                  ? "Files must be 15 MB or smaller."
+                : "";
+              setFile(selectedFile);
+              setFileError(message);
+              setFormError(message);
+            }}
+            required
+          />
+        </label>
 
-      <button type="submit" disabled={isUploading}>
+        {fileError && <p className="form-error" role="alert">{fileError}</p>}
+        {formError && !fileError && <p className="form-error" role="alert">{formError}</p>}
+
+        <button className="button button-primary button-wide" type="submit" disabled={isUploading}>
         {isUploading ? "Uploading..." : "Upload"}
-      </button>
-    </form>
+        </button>
+      </form>
+    </section>
   );
 }
 
